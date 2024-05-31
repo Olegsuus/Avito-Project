@@ -1,7 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"Avito-Project/internal/config"
+	"Avito-Project/internal/models"
+	"Avito-Project/internal/storage"
+)
 
 func main() {
-	fmt.Println("Start Avito-Project ")
+	App := &models.App{}
+	cfg := config.GetConfig()
+	db := storage.GetStorage(cfg)
+	migration.Migration(cfg)
 }
