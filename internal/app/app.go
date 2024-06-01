@@ -1,21 +1,22 @@
-package models
+package app
 
 import (
 	"Avito-Project/internal/config"
 	_ "Avito-Project/internal/config"
+	"Avito-Project/internal/server"
 	"database/sql"
-	"fmt"
-	"net/http"
 )
 
 type App struct {
 	Config          *config.Config
 	DB              *sql.DB
-	ServerInterface http.Handler
+	ServerInterface server.ServerInterface
 }
 
 func (a *App) Start(port int) error {
-	return http.ListenAndServe(fmt.Sprintf(":%d", port), a.ServerInterface)
+	//TODO db.GetUser("token")
+	//TODO db.GetBanner(id)
+	return nil
 }
 
 func (a *App) Stop() {

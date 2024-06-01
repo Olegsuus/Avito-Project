@@ -1,4 +1,4 @@
-package storage
+package db
 
 import (
 	"Avito-Project/internal/config"
@@ -22,3 +22,11 @@ func GetStorage(cfg *config.Config) *sql.DB {
 
 	return db
 }
+
+//func GetUser(db *sql.DB, token string) *Users {
+//	//TODO написать функцию которая возвращает данные юзера по токену
+//}
+
+//func GetBannary(db *sql.DB, id int) *Bannary{
+//	//TODO написать функцию которая возвращает данные по банеру по id
+//}

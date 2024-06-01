@@ -1,14 +1,13 @@
 package main
 
-//import (
-//	"Avito-Project/internal/config"
-//	"Avito-Project/internal/models"
-//	"Avito-Project/internal/storage"
-//)
+import (
+	"Avito-Project/internal/app"
+	"Avito-Project/internal/config"
+	"Avito-Project/internal/db"
+)
 
-//func main() {
-//	App := &models.App{}
-//	cfg := config.GetConfig()
-//	db := storage.GetStorage(cfg)
-//	migration.Migration(cfg)
-//}
+func main() {
+	App := &app.App{}
+	cfg := config.GetConfig()
+	db := db.GetStorage(cfg)
+}
