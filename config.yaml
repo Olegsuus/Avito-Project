@@ -2,7 +2,6 @@ server:
   port: 8082
   host: "localhost"
 
-
 database:
   driver: "PostgreSQL"
   host: "localhost"
