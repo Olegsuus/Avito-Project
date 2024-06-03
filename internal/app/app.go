@@ -7,6 +7,7 @@ import (
 	"Avito-Project/internal/server"
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 type App struct {
@@ -18,13 +19,13 @@ type App struct {
 func (a *App) Start(port int) error {
 	userInfo, err := db.GetUser(a.DB, "token1111")
 	if err != nil {
-		fmt.Printf("Failed to get informaition user: %v", err)
+		log.Printf("Failed to get informaition user: %v", err)
 		return err
 	}
 
 	bannerInfo, err := db.GetBanners(a.DB, 1)
 	if err != nil {
-		fmt.Printf("Failed to get informaition banner: %v", err)
+		log.Printf("Failed to get informaition banner: %v", err)
 	}
 
 	fmt.Printf("User information: %v", userInfo)
