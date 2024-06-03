@@ -10,4 +10,5 @@ func main() {
 	App := &app.App{}
 	cfg := config.GetConfig()
 	db := db.GetStorage(cfg)
+
 }
