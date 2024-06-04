@@ -7,8 +7,11 @@ import (
 )
 
 func main() {
-	App := &app.App{}
+
 	cfg := config.GetConfig()
-	db := db.GetStorage(cfg)
+	db := db.GetStorage(cfg) // Должен вернуть кастомный обьект (структура), с методами из интерфейса
+	migrate.migrate() // добавить миграцию
+	App := &app.App{DB: db, config: cfg}
+
 
 }

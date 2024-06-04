@@ -25,6 +25,12 @@ func GetStorage(cfg *config.Config) *sql.DB {
 	return db
 }
 
+// todo реализовать структуру, реализующую интерфейс хранилица
+//	struct{
+//		db *sql.DB
+//}
+
+// методы
 // GetUser функция для получения данных юзера по токкену
 func GetUser(db *sql.DB, token string) (*models.User, error) {
 	var user models.User

@@ -12,8 +12,7 @@ import (
 
 type App struct {
 	Config          *config.Config
-	DB              *sql.DB
-	ServerInterface server.ServerInterface
+	DB              Storage
 }
 
 func (a *App) Start(port int) error {
@@ -39,3 +38,11 @@ func (a *App) Stop() {
 		a.DB.Close()
 	}
 }
+
+type Storage interface{
+	GetBanner(id int) (model.Banner, error)
+	GetBanners(fId int) ([]model.Banner, error)
+	GetUser(token string) (model.User, error)
+}
+
+1.
