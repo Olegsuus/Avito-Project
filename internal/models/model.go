@@ -23,3 +23,10 @@ type Banner struct {
 	OwnerId   uint      `json:"owner_id"`
 	FId       int       `json:"f_id"`
 }
+
+// Структура тегов
+type Tags struct {
+	Id       uint   `json:"id"`
+	Name     string `json:"name"`
+	BannerId uint   `json:"banner_id"`
+}

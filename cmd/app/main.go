@@ -1,14 +1,15 @@
 package main
 
 import (
-	"Avito-Project/internal/app"
 	"Avito-Project/internal/config"
 	"Avito-Project/internal/db"
+	"Avito-Project/internal/migration"
 )
 
 func main() {
-	App := &app.App{}
 	cfg := config.GetConfig()
-	db := db.GetStorage(cfg)
+	db := db.DataBase{}
+	db.GetStorage(cfg)
+	migration.Migrations(cfg)
 
 }
