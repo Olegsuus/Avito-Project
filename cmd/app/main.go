@@ -12,6 +12,7 @@ func main() {
 	db := db.DataBase{}
 	db.GetStorage(cfg)
 	migration.Migrations(cfg)
-	App := app.App{cfg, db}
+	App := app.App{Config: cfg, DB: &db}
+	_ = App.Start()
 
 }
