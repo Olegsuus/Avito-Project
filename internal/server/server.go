@@ -1,8 +1,9 @@
 package server
 
 import (
-	"Avito-Project/internal/app"
 	"net/http"
+
+	"Avito-Project/internal/app"
 )
 
 type ServerInterface interface {
