@@ -28,6 +28,20 @@ func (db *DataBase) GetStorage(cfg *config.Config) {
 	}
 }
 
+// Stop метод для закрытие БД
+func (db *DataBase) Stop() error {
+	if db.DB != nil {
+		err := db.DB.Close()
+		{
+			if err != nil {
+				log.Fatalf("Failed to closed database: %v", err)
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 // GetUser метод для получения данных юзера по токкену
 func (db *DataBase) GetUser(token string) (*models.User, error) {
 	var user models.User
@@ -58,14 +72,14 @@ func (db *DataBase) GetBanner(id int) (*models.Banner, error) {
 			return nil, nil
 		}
 
-		log.Printf("Failed to scan row: %v", err)
+		log.Printf("Failed to scan row: %v\n", err)
 		return nil, err
 	}
 	return &banner, nil
 }
 
-// GetUsersForID метод для получения юзера по id
-func (db *DataBase) GetUserForID(id int) (*models.User, error) {
+// GetUserByID метод для получения юзера по id
+func (db *DataBase) GetUserByID(id int) (*models.User, error) {
 	var user models.User
 	query := "SELECT id, name, access_level, created_at, updated_at, token FROM Users WHERE id = $1"
 	row := db.DB.QueryRow(query, id)
@@ -75,53 +89,59 @@ func (db *DataBase) GetUserForID(id int) (*models.User, error) {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		log.Printf("Failed to scan row: %v", err)
+		log.Printf("Failed to scan row: %v\n", err)
 		return nil, err
 	}
 
 	return &user, nil
 }
 
-// GetBannersForUserID метод для получения списка баннеров по id пользователя
-func (db *DataBase) GetBannersForUserID(userID int) ([]models.Banner, error) {
+// GetBannersByTagID метод для получения списка баннеров по id тега
+func (db *DataBase) GetBannersByTagID(tagID int) ([]models.Banner, error) {
 	var banners []models.Banner
-	query := "SELECT id, title, text, url, created_at, updated_at,owner_id, f_id FROM Banners WHERE owner_id = 1$"
-	rows, err := db.DB.Query(query, userID)
+	query := `
+	SELECT b.id, b.title, b.text, b.url, b.created_at, b.updated_at, b.owner_id, b.f_id
+    FROM banners b
+    JOIN tags t ON b.id = t.banner_id
+    WHERE t.id = $1`
+
+	rows, err := db.DB.Query(query, tagID)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Failed to execute query: %v\n", err)
+		return nil, err
 	}
 
-	defer db.DB.Close()
+	defer rows.Close()
 
 	for rows.Next() {
 		var banner models.Banner
 		err := rows.Scan(&banner.Id, &banner.Title, &banner.Text, &banner.Url, &banner.CreatedAt, &banner.UpdatedAt, &banner.OwnerId, &banner.FId)
 		if err != nil {
-			log.Fatalf("Failed to Scan rows: %v", err)
+			log.Fatalf("Failed to scan rows: %v\n", err)
 			return nil, err
 		}
+
 		banners = append(banners, banner)
 	}
-
 	if err := rows.Err(); err != nil {
-		log.Fatalf("Row iteration error: %v", err)
+		log.Fatalf("log.Printf(\"Row iteration error: %v\n", err)
 		return nil, err
 	}
 
 	return banners, nil
 }
 
-// GetBannersForFID метод для получение списка баннеров по f_id
-func (db *DataBase) GetBannersForFID(fID int) ([]models.Banner, error) {
+// GetBannersByFID метод для получение списка баннеров по f_id
+func (db *DataBase) GetBannersByFID(fID int) ([]models.Banner, error) {
 	var banners []models.Banner
 	query := "SELECT id, title, text, url, created_at, updated_at,owner_id, f_id FROM Banners WHERE owner_id = 1$"
 	rows, err := db.DB.Query(query, fID)
 	if err != nil {
-		log.Fatalf("Failed to execute query: %v", err)
+		log.Fatalf("Failed to execute query: %v\n", err)
 		return nil, err
 	}
 
-	defer db.DB.Close()
+	defer rows.Close()
 
 	for rows.Next() {
 		var banner models.Banner
@@ -133,7 +153,7 @@ func (db *DataBase) GetBannersForFID(fID int) ([]models.Banner, error) {
 	}
 
 	if err := rows.Err(); err != nil {
-		log.Fatalf("Failed iteration rows: %v ", err)
+		log.Fatalf("Failed iteration rows: %v\n", err)
 		return nil, err
 	}
 

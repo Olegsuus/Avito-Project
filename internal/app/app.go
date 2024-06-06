@@ -18,8 +18,9 @@ type App struct {
 type Storage interface {
 	GetBanner(int) (models.Banner, error)
 	GetUser(string) (models.User, error)
-	GetBannersForUserID(int) ([]models.Banner, error)
-	GetBannersForFID(int) ([]models.Banner, error)
+	GetBannersByTagID(int) ([]models.Banner, error)
+	GetBannersByFID(int) ([]models.Banner, error)
+	Stop()
 }
 
 func (a *App) Start(port int) error {
@@ -41,7 +42,5 @@ func (a *App) Start(port int) error {
 
 // Stop закрывает если есть ошибки
 func (a *App) Stop() {
-	if a.DB != nil {
-		a.DB.Close()
-	}
+	a.DB.Stop()
 }
