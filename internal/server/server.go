@@ -11,3 +11,7 @@ type ServerInterface interface {
 
 type Server struct {
 }
+
+func (s *Server) GetServer(a *app.App) http.Handler {
+	return nil
+}
