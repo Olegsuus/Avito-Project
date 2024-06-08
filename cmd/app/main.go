@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"Avito-Project/internal/app"
 	"Avito-Project/internal/config"
 	"Avito-Project/internal/db"
@@ -13,6 +15,12 @@ func main() {
 	db.GetStorage(cfg)
 	migration.Migrations(cfg)
 	App := app.App{Config: cfg, DB: &db}
-	_ := App.Start()
+	//_ := App.Start()
 
+	srv := &app.Server{}
+	App.ServerInterface = srv
+
+	if err := App.Start(); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }

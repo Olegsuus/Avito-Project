@@ -8,13 +8,12 @@ import (
 	"Avito-Project/internal/config"
 	_ "Avito-Project/internal/config"
 	"Avito-Project/internal/models"
-	"Avito-Project/internal/server"
 )
 
 type App struct {
 	Config          *config.Config
 	DB              Storage
-	ServerInterface server.ServerInterface
+	ServerInterface ServerInterface
 }
 
 type Storage interface {
@@ -28,22 +27,12 @@ type Storage interface {
 func (a *App) Start() error {
 	// todo прямо вот тут надо добавить добавление роутов и обработчиков
 	// обработчики сделать методами App. Написать в отдельном файле handler.go
-	mux := http.NewServeMux()
+	mux := a.ServerInterface.GetServer(a)
 
-	userInfo, err := a.DB.GetUser("token1111")
-	if err != nil {
-		log.Printf("Failed to get informaition user: %v", err)
-		return err
-	}
-
-	bannerInfo, err := a.DB.GetBanner(1)
-	if err != nil {
-		log.Printf("Failed to get informaition banner: %v", err)
-	}
-
-	fmt.Printf("User information: %v", userInfo)
-	fmt.Printf("Banner information: %v", bannerInfo)
-	return nil
+	//todo: понять почему не передается порт с кофнига
+	addr := fmt.Sprintf(":%d", 8082)
+	log.Printf("Starting server on %s", addr)
+	return http.ListenAndServe(addr, mux)
 }
 
 // Stop закрывает если есть ошибки

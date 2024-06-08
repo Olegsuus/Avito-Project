@@ -124,7 +124,7 @@ func (db *DataBase) GetBannersByTagID(tagID int) ([]models.Banner, error) {
 		banners = append(banners, banner)
 	}
 	if err := rows.Err(); err != nil {
-		log.Fatalf("log.Printf(\"Row iteration error: %v\n", err)
+		log.Fatalf("Row iteration error: %v\n", err)
 		return nil, err
 	}
 
