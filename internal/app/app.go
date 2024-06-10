@@ -3,17 +3,18 @@ package app
 import (
 	"fmt"
 	"log"
-	"net/http"
 
 	"Avito-Project/internal/config"
 	_ "Avito-Project/internal/config"
 	"Avito-Project/internal/models"
+	"github.com/labstack/echo/v4"
 )
 
 type App struct {
 	Config          *config.Config
 	DB              Storage
 	ServerInterface ServerInterface
+	Echo            *echo.Echo
 }
 
 type Storage interface {
@@ -21,18 +22,18 @@ type Storage interface {
 	GetUser(string) (*models.User, error)
 	GetBannersByTagID(int) ([]models.Banner, error)
 	GetBannersByFID(int) ([]models.Banner, error)
+	GetAllUsers() ([]models.User, error)
+	GetAllBanners() ([]models.Banner, error)
 	Stop() error
 }
 
 func (a *App) Start() error {
-	// todo прямо вот тут надо добавить добавление роутов и обработчиков
-	// обработчики сделать методами App. Написать в отдельном файле handler.go
-	mux := a.ServerInterface.GetServer(a)
+	a.Echo = echo.New()
+	a.ServerInterface.GetServer(a)
 
-	//todo: понять почему не передается порт с кофнига
-	addr := fmt.Sprintf(":%d", 8082)
+	addr := fmt.Sprintf(":%d", a.Config.Database.Port)
 	log.Printf("Starting server on %s", addr)
-	return http.ListenAndServe(addr, mux)
+	return a.Echo.Start(addr)
 }
 
 // Stop закрывает если есть ошибки

@@ -1,11 +1,13 @@
 package db
 
 import (
+	"fmt"
+	"log"
+
 	"Avito-Project/internal/config"
 	"Avito-Project/internal/models"
 	"database/sql"
-	"fmt"
-	"log"
+	_ "github.com/lib/pq"
 )
 
 type DataBase struct {
@@ -14,7 +16,7 @@ type DataBase struct {
 
 // GetStorage функция для подключения к Базе Данных
 func (db *DataBase) GetStorage(cfg *config.Config) {
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%d dbname=%s sslmode=disable",
 		cfg.Database.Host, cfg.Database.Port, cfg.Database.User, cfg.Database.Password, cfg.Database.DBName)
 
 	var err error
@@ -158,4 +160,61 @@ func (db *DataBase) GetBannersByFID(fID int) ([]models.Banner, error) {
 	}
 
 	return banners, nil
+}
+
+// GetAllBanners метод для получения всего списка баннеров
+func (db *DataBase) GetAllBanners() ([]models.Banner, error) {
+	var banners []models.Banner
+
+	query := "SELECT * FROM Banners"
+	rows, err := db.DB.Query(query)
+	if err != nil {
+		log.Printf("Failed to execute query: %v\n", err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var banner models.Banner
+		err := rows.Scan(&banner.Id, &banner.Title, &banner.Text, &banner.Url, &banner.CreatedAt, &banner.UpdatedAt, &banner.OwnerId, &banner.FId)
+		if err != nil {
+			log.Printf("Failed to scan row: %v\n", err)
+		}
+		banners = append(banners, banner)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Fatalf("Failed iteration rows: %v\n", err)
+		return nil, err
+	}
+
+	return banners, nil
+}
+
+// GetAllUsers метод для получения всего списка юзеров
+func (db *DataBase) GetAllUsers() ([]models.User, error) {
+	var users []models.User
+
+	query := "SELECT * FROM Users"
+	rows, err := db.DB.Query(query)
+	if err != nil {
+		log.Printf("Failed to execute query: %v\n", err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(&user.Id, &user.Name, &user.AccessLevels, &user.CreatedAt, &user.UpdatedAt, &user.Token)
+		if err != nil {
+			log.Printf("Failed to scan row: %v\n", err)
+		}
+		users = append(users, user)
+	}
+	if err := rows.Err(); err != nil {
+		log.Fatalf("Failed iteration rows: %v\n", err)
+		return nil, err
+	}
+
+	return users, nil
 }

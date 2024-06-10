@@ -1,9 +1,11 @@
 package migration
 
 import (
+	"embed"
+	"log"
+
 	"Avito-Project/internal/config"
 	"database/sql"
-	"embed"
 	"github.com/pressly/goose/v3"
 )
 
@@ -17,10 +19,10 @@ func Migrations(cfg *config.Config) {
 	goose.SetBaseFS(embedMigrations)
 
 	if err := goose.SetDialect("postgres"); err != nil {
-		panic(err)
+		log.Fatalf("Failed to set goose dialect: %v", err)
 	}
 
-	if err := goose.Up(db, "migrations"); err != nil {
-		panic(err)
+	if err := goose.Up(db, "."); err != nil {
+		log.Fatalf("Failed to apply migrations: %v", err)
 	}
 }

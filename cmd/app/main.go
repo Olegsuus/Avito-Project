@@ -1,12 +1,12 @@
 package main
 
 import (
+	migration "Avito-Project/internal/migrations"
 	"log"
 
 	"Avito-Project/internal/app"
 	"Avito-Project/internal/config"
 	"Avito-Project/internal/db"
-	"Avito-Project/internal/migration"
 )
 
 func main() {
