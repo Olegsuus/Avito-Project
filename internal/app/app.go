@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/labstack/echo/v4/middleware"
 	"log"
 
 	"Avito-Project/internal/config"
@@ -30,13 +31,17 @@ type Storage interface {
 func (a *App) Start() error {
 	a.Echo = echo.New()
 	a.ServerInterface.GetServer(a)
+	a.Echo.Use(middleware.Logger())
+	a.Echo.Use(middleware.Recover())
 
-	addr := fmt.Sprintf(":%d", a.Config.Database.Port)
+	addr := fmt.Sprintf(":%d", a.Config.Server.Port)
 	log.Printf("Starting server on %s", addr)
 	return a.Echo.Start(addr)
 }
 
 // Stop закрывает если есть ошибки
 func (a *App) Stop() {
-	a.DB.Stop()
+	if err := a.DB.Stop(); err != nil {
+		log.Fatalf("Failed to close database: %v", err)
+	}
 }

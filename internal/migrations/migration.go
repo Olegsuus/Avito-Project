@@ -9,12 +9,10 @@ import (
 	"github.com/pressly/goose/v3"
 )
 
-//go:embedMigrations/*.sql
+//go:embed migrations/20240601104358_new_user_table.sql
 var embedMigrations embed.FS
 
-func Migrations(cfg *config.Config) {
-	var db *sql.DB
-	//setup database
+func Migrations(cfg *config.Config, db *sql.DB) {
 
 	goose.SetBaseFS(embedMigrations)
 
@@ -22,7 +20,7 @@ func Migrations(cfg *config.Config) {
 		log.Fatalf("Failed to set goose dialect: %v", err)
 	}
 
-	if err := goose.Up(db, "."); err != nil {
+	if err := goose.Up(db, "migrations"); err != nil {
 		log.Fatalf("Failed to apply migrations: %v", err)
 	}
 }
