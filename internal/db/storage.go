@@ -47,7 +47,7 @@ func (db *DataBase) Stop() error {
 // GetUser метод для получения данных юзера по токкену
 func (db *DataBase) GetUser(token string) (*models.User, error) {
 	var user models.User
-	query := "SELECT id, name, access_level, created_at, updated_at, token FROM Users WHERE token = $1"
+	query := "SELECT id, name, access_levels, created_at, updated_at, token FROM Users WHERE token = $1"
 	row := db.DB.QueryRow(query, token)
 
 	err := row.Scan(&user.Id, &user.Name, &user.AccessLevels, &user.CreatedAt, &user.UpdatedAt, &user.Token)
@@ -83,7 +83,7 @@ func (db *DataBase) GetBanner(id int) (*models.Banner, error) {
 // GetUserByID метод для получения юзера по id
 func (db *DataBase) GetUserByID(id int) (*models.User, error) {
 	var user models.User
-	query := "SELECT id, name, access_level, created_at, updated_at, token FROM Users WHERE id = $1"
+	query := "SELECT id, name, access_levels, created_at, updated_at, token FROM Users WHERE id = $1"
 	row := db.DB.QueryRow(query, id)
 
 	err := row.Scan(&user.Id, &user.Name, &user.AccessLevels, &user.CreatedAt, &user.UpdatedAt, &user.Token)
@@ -166,7 +166,7 @@ func (db *DataBase) GetBannersByFID(fID int) ([]models.Banner, error) {
 func (db *DataBase) GetAllBanners() ([]models.Banner, error) {
 	var banners []models.Banner
 
-	query := "SELECT * FROM Banners"
+	query := "SELECT id, title, text, url, created_at, updated_at, owner_id, f_id FROM Banners"
 	rows, err := db.DB.Query(query)
 	if err != nil {
 		log.Printf("Failed to execute query: %v\n", err)
@@ -195,7 +195,7 @@ func (db *DataBase) GetAllBanners() ([]models.Banner, error) {
 func (db *DataBase) GetAllUsers() ([]models.User, error) {
 	var users []models.User
 
-	query := "SELECT * FROM Users"
+	query := "SELECT id, name, access_levels, created_at, updated_at, token FROM Users"
 	rows, err := db.DB.Query(query)
 	if err != nil {
 		log.Printf("Failed to execute query: %v\n", err)
@@ -219,8 +219,59 @@ func (db *DataBase) GetAllUsers() ([]models.User, error) {
 	return users, nil
 }
 
-//todo: добавить добавление записей в таблицы
-//todo: добавить удаление записей в таблицах
+// AddUser метод для добавления юзера
+func (db *DataBase) AddUser(user *models.User) error {
+	query := "INSERT INTO Users (name, access_levels,token) VALUES ($1, $2, $3) RETURNING id"
+	err := db.DB.QueryRow(query, user.Name, user.AccessLevels, user.Token).Scan(&user.Id)
+	if err != nil {
+		log.Printf("Failed to add user: %v", err)
+		return err
+	}
+	return nil
+}
+
+// DeleteUser метод для удаления юзера
+func (db *DataBase) DeleteUser(userId int) error {
+	query := "DELETE FROM Users WHERE id = $1"
+	_, err := db.DB.Exec(query, userId)
+	if err != nil {
+		log.Printf("Failed to delete user: %v", err)
+		return err
+	}
+	return nil
+}
+
+// AddBanner метод для добавления баннера
+func (db *DataBase) AddBanner(banner *models.Banner) error {
+	query := "INSERT INTO Banners (title, text, url, owner_id, f_id) VALUES ($1, $2,$3, $4, $5) RETURNING id"
+	err := db.DB.QueryRow(query, banner.Title, banner.Text, banner.Url, banner.OwnerId, banner.FId).Scan(&banner.Id)
+	if err != nil {
+		log.Printf("Failed to add banner: %v", err)
+		return err
+	}
+	return nil
+}
+
+// DeleteBanner метод для удаления баннера
+func (db *DataBase) DeleteBanner(bannerId int) error {
+	query := "DELETE FROM Banners WHERE id = $1"
+	_, err := db.DB.Exec(query, bannerId)
+	if err != nil {
+		log.Printf("Failed to delete banner: %v", err)
+		return err
+	}
+	return nil
+}
+
+// AddAccessLevel метод для добавления уровня доступа
+func (db *DataBase) AddAccessLevel(level *models.AccessLevel) error {
+	query := "INSERT INTO Access_levels (level, job_title) VALUES ($1, $2)"
+	err := db.DB.QueryRow(query, level.Level, level.JobTitle)
+	if err != nil {
+		log.Printf("Failed to add access level: %v", err)
+	}
+	return nil
+}
 
 //todo: добавить пагинацию при получения баннеров
 //(необходимо ввести стандартный размер страницы. Можно в конфиг)

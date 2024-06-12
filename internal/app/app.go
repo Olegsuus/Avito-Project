@@ -21,11 +21,17 @@ type App struct {
 type Storage interface {
 	GetBanner(int) (*models.Banner, error)
 	GetUser(string) (*models.User, error)
+	GetUserByID(int) (*models.User, error)
 	GetBannersByTagID(int) ([]models.Banner, error)
 	GetBannersByFID(int) ([]models.Banner, error)
 	GetAllUsers() ([]models.User, error)
 	GetAllBanners() ([]models.Banner, error)
 	Stop() error
+	AddUser(*models.User) error
+	DeleteUser(int) error
+	AddBanner(*models.Banner) error
+	DeleteBanner(int) error
+	AddAccessLevel(*models.AccessLevel) error
 }
 
 func (a *App) Start() error {

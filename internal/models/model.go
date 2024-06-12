@@ -30,3 +30,8 @@ type Tags struct {
 	Name     string `json:"name"`
 	BannerId uint   `json:"banner_id"`
 }
+
+type AccessLevel struct {
+	Level    int    `json:"level"`
+	JobTitle string `json:"job_title"`
+}
