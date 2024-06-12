@@ -47,7 +47,7 @@ func (db *DataBase) Stop() error {
 // GetUser метод для получения данных юзера по токкену
 func (db *DataBase) GetUser(token string) (*models.User, error) {
 	var user models.User
-	query := "SELECT id, name, access_level, created_at, updated_at, token FROM Users WHERE token = $1"
+	query := "SELECT id, name, access_levels, created_at, updated_at, token FROM Users WHERE token = $1"
 	row := db.DB.QueryRow(query, token)
 
 	err := row.Scan(&user.Id, &user.Name, &user.AccessLevels, &user.CreatedAt, &user.UpdatedAt, &user.Token)
@@ -83,7 +83,7 @@ func (db *DataBase) GetBanner(id int) (*models.Banner, error) {
 // GetUserByID метод для получения юзера по id
 func (db *DataBase) GetUserByID(id int) (*models.User, error) {
 	var user models.User
-	query := "SELECT id, name, access_level, created_at, updated_at, token FROM Users WHERE id = $1"
+	query := "SELECT id, name, access_levels, created_at, updated_at, token FROM Users WHERE id = $1"
 	row := db.DB.QueryRow(query, id)
 
 	err := row.Scan(&user.Id, &user.Name, &user.AccessLevels, &user.CreatedAt, &user.UpdatedAt, &user.Token)
@@ -243,7 +243,7 @@ func (db *DataBase) DeleteUser(userId int) error {
 
 // AddBanner метод для добавления баннера
 func (db *DataBase) AddBanner(banner *models.Banner) error {
-	query := "INSERT INTO Banners (title, text, url, owner_id, f_id) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+	query := "INSERT INTO Banners (title, text, url, owner_id, f_id) VALUES ($1, $2,$3, $4, $5) RETURNING id"
 	err := db.DB.QueryRow(query, banner.Title, banner.Text, banner.Url, banner.OwnerId, banner.FId).Scan(&banner.Id)
 	if err != nil {
 		log.Printf("Failed to add banner: %v", err)

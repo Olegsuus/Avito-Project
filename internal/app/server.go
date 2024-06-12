@@ -14,8 +14,11 @@ func (s *Server) GetServer(app *App) {
 	app.Echo.GET("/bannersByTagId", app.HandleGetBannersByTagID)
 	app.Echo.GET("/banners", app.HandleGetAllBanners)
 	app.Echo.GET("/user", app.HandleGetUser)
+	app.Echo.GET("/userId", app.HandleGetUserById)
 	app.Echo.GET("/users", app.HandleGetAllUsers)
 	app.Echo.POST("/addUser", app.HandleAddUser)
-	app.Echo.POST("/addBanner", app.HandleAddUBanner)
+	app.Echo.POST("/addBanner", app.HandleAddBanner)
 	app.Echo.POST("/addALevel", app.HandleAddAccessLevel)
+	app.Echo.DELETE("/deleteUser", app.HandleDeleteUser)
+	app.Echo.DELETE("/deleteBanner", app.HandleDeleteBanner)
 }
