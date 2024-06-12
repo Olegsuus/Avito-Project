@@ -1,6 +1,7 @@
 package app
 
 import (
+	"Avito-Project/internal/models"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
@@ -126,7 +127,7 @@ func (a *App) HandleGetAllBanners(c echo.Context) error {
 	return c.JSON(http.StatusOK, banners)
 }
 
-// HandleGetAllUsers метод для получения всех баннеров через фреймвор echo
+// HandleGetAllUsers метод для получения всех баннеров через фреймворк echo
 func (a *App) HandleGetAllUsers(c echo.Context) error {
 	users, err := a.DB.GetAllUsers()
 	if err != nil {
@@ -134,4 +135,48 @@ func (a *App) HandleGetAllUsers(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, users)
+}
+
+// HandleAddUser метод для добавления юзера через фреймворк echo
+func (a *App) HandleAddUser(c echo.Context) error {
+	var user models.User
+	if err := c.Bind(&user); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+	err := a.DB.AddUser(&user)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusCreated, user)
+}
+
+// HandleAddBanner метод для добавления баннера через фреймворк echo
+func (a *App) HandleAddUBanner(c echo.Context) error {
+	var banner models.Banner
+	if err := c.Bind(&banner); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+	err := a.DB.AddBanner(&banner)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusCreated, banner)
+}
+
+// HandleAddAccessLevel метод для добавления уровня доступа
+func (a *App) HandleAddAccessLevel(c echo.Context) error {
+	var level models.AccessLevel
+
+	if err := c.Bind(&level); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	err := a.DB.AddAccessLevel(&level)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusCreated, level)
 }

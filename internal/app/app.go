@@ -26,6 +26,11 @@ type Storage interface {
 	GetAllUsers() ([]models.User, error)
 	GetAllBanners() ([]models.Banner, error)
 	Stop() error
+	AddUser(*models.User) error
+	DeleteUser(int) error
+	AddBanner(*models.Banner) error
+	DeleteBanner(int) error
+	AddAccessLevel(*models.AccessLevel) error
 }
 
 func (a *App) Start() error {
