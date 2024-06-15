@@ -6,15 +6,16 @@ import (
 )
 
 type ServerConfig struct {
-	Port int
+	Port     int `yaml:"port"`
+	PageSize int `yaml:"pageSize"`
 }
 
 type DatabaseConfig struct {
-	Host     string
-	Port     int
-	User     string
-	Password string
-	DBName   string
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	DBName   string `yaml:"dbname"`
 }
 
 type Config struct {

@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-// HandleGetUser метод для получения юзера через
+// HandleGetUser обработчик запроса для получения юзера через
 func (a *App) HandleGetUser(c echo.Context) error {
 	token := c.QueryParam("token")
 	user, err := a.DB.GetUser(token)
@@ -18,6 +18,7 @@ func (a *App) HandleGetUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
+// HandleGetUserById обработчик запроса для получения юзера по id
 func (a *App) HandleGetUserById(c echo.Context) error {
 	idStr := c.QueryParam("id")
 	id, err := strconv.Atoi(idStr)
@@ -32,7 +33,7 @@ func (a *App) HandleGetUserById(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
-// HandleGetBanner метод для получения баннера через
+// HandleGetBanner обработчик запроса для получения баннера через
 func (a *App) HandleGetBanner(c echo.Context) error {
 	idStr := c.QueryParam("id")
 	id, err := strconv.Atoi(idStr)
@@ -48,15 +49,15 @@ func (a *App) HandleGetBanner(c echo.Context) error {
 	return c.JSON(http.StatusOK, banner)
 }
 
-// HandleGetBannersByFID метод для получения баннера по фичи
+// HandleGetBannersByFID обработчик запроса для получения баннера по фичи
 func (a *App) HandleGetBannersByFID(c echo.Context) error {
-	fIdStr := c.QueryParam("Fid")
+	fIdStr := c.QueryParam("f_id")
 	fId, err := strconv.Atoi(fIdStr)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	banner, err := a.DB.GetBannersByFID(fId)
+	banner, err := a.DB.GetBannerByFID(fId)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]string{"error": err.Error()})
 	}
@@ -65,14 +66,14 @@ func (a *App) HandleGetBannersByFID(c echo.Context) error {
 
 }
 
-// HandleGetBannersByTagID метод для получения баннера по фичи
+// HandleGetBannersByTagID обработчик запроса для получения баннера по фичи
 func (a *App) HandleGetBannersByTagID(c echo.Context) error {
 	tagID, err := strconv.Atoi(c.Param("tag_id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	banners, err := a.DB.GetBannersByTagID(tagID)
+	banners, err := a.DB.GetBannerByTagID(tagID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
@@ -80,7 +81,7 @@ func (a *App) HandleGetBannersByTagID(c echo.Context) error {
 	return c.JSON(http.StatusOK, banners)
 }
 
-// HandleGetAllBanners метод для получения всех баннеров
+// HandleGetAllBanners обработчик запроса для получения всех баннеров
 func (a *App) HandleGetAllBanners(c echo.Context) error {
 	banners, err := a.DB.GetAllBanners()
 	if err != nil {
@@ -90,7 +91,7 @@ func (a *App) HandleGetAllBanners(c echo.Context) error {
 	return c.JSON(http.StatusOK, banners)
 }
 
-// HandleGetAllUsers метод для получения всех баннеров
+// HandleGetAllUsers обработчик запроса для получения всех баннеров
 func (a *App) HandleGetAllUsers(c echo.Context) error {
 	users, err := a.DB.GetAllUsers()
 	if err != nil {
@@ -100,7 +101,7 @@ func (a *App) HandleGetAllUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
-// HandleAddUser метод для добавления юзера через
+// HandleAddUser обработчик запроса для добавления юзера через
 func (a *App) HandleAddUser(c echo.Context) error {
 	var user models.User
 	if err := c.Bind(&user); err != nil {
@@ -114,7 +115,7 @@ func (a *App) HandleAddUser(c echo.Context) error {
 	return c.JSON(http.StatusCreated, user)
 }
 
-// HandleAddBanner метод для добавления баннера
+// HandleAddBanner обработчик запроса для добавления баннера
 func (a *App) HandleAddBanner(c echo.Context) error {
 	var banner models.Banner
 	if err := c.Bind(&banner); err != nil {
@@ -128,7 +129,7 @@ func (a *App) HandleAddBanner(c echo.Context) error {
 	return c.JSON(http.StatusCreated, banner)
 }
 
-// HandleAddAccessLevel метод для добавления уровня доступа
+// HandleAddAccessLevel обработчик запроса для добавления уровня доступа
 func (a *App) HandleAddAccessLevel(c echo.Context) error {
 	var level models.AccessLevel
 
@@ -144,7 +145,7 @@ func (a *App) HandleAddAccessLevel(c echo.Context) error {
 	return c.JSON(http.StatusCreated, level)
 }
 
-// HandleDeleteUser метод для удаления юзера
+// HandleDeleteUser обработчик запроса для удаления юзера
 func (a *App) HandleDeleteUser(c echo.Context) error {
 	userId, err := strconv.Atoi(c.QueryParam("id"))
 	if err != nil {
@@ -159,7 +160,7 @@ func (a *App) HandleDeleteUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"status": "success"})
 }
 
-// HandleDeleteBanner метод для удаления баннера
+// HandleDeleteBanner обработчик запроса для удаления баннера
 func (a *App) HandleDeleteBanner(c echo.Context) error {
 	bannerId, err := strconv.Atoi(c.QueryParam("id"))
 	if err != nil {
@@ -172,4 +173,50 @@ func (a *App) HandleDeleteBanner(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{"status": "success"})
+}
+
+// HandleGetUsersPaginated обработчик запроса для вывода юзеров через пагинацию
+func (a *App) HandleGetUsersPaginated(c echo.Context) error {
+	pageParam := c.QueryParam("page")
+	sizeParam := c.QueryParam("size")
+
+	page, err := strconv.Atoi(pageParam)
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	size, err := strconv.Atoi(sizeParam)
+	if err != nil || size < 1 {
+		size = a.Config.Server.PageSize
+	}
+
+	users, err := a.DB.GetUsersPaginated(page, size)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, users)
+}
+
+// HandleGetBannersPaginated обработчик запроса на получения баннеров постранично
+func (a *App) HandleGetBannersPaginated(c echo.Context) error {
+	pageParam := c.QueryParam("page")
+	sizeParam := c.QueryParam("size")
+
+	page, err := strconv.Atoi(pageParam)
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	size, err := strconv.Atoi(sizeParam)
+	if err != nil || size < 1 {
+		size = a.Config.Server.PageSize
+	}
+
+	banners, err := a.DB.GetBannersPaginated(page, size)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, banners)
 }

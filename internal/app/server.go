@@ -21,4 +21,6 @@ func (s *Server) GetServer(app *App) {
 	app.Echo.POST("/addALevel", app.HandleAddAccessLevel)
 	app.Echo.DELETE("/deleteUser", app.HandleDeleteUser)
 	app.Echo.DELETE("/deleteBanner", app.HandleDeleteBanner)
+	app.Echo.GET("/users/paginated", app.HandleGetUsersPaginated)
+	app.Echo.GET("/banners/paginated", app.HandleGetBannersPaginated)
 }
