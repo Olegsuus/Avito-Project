@@ -187,7 +187,7 @@ func (a *App) HandleGetUsersPaginated(c echo.Context) error {
 
 	size, err := strconv.Atoi(sizeParam)
 	if err != nil || size < 1 {
-		size = a.Config.Server.PageSize
+		size = a.Config.PageSize
 	}
 
 	users, err := a.DB.GetUsersPaginated(page, size)
@@ -210,7 +210,7 @@ func (a *App) HandleGetBannersPaginated(c echo.Context) error {
 
 	size, err := strconv.Atoi(sizeParam)
 	if err != nil || size < 1 {
-		size = a.Config.Server.PageSize
+		size = a.Config.PageSize
 	}
 
 	banners, err := a.DB.GetBannersPaginated(page, size)

@@ -278,7 +278,11 @@ func (db *DataBase) GetUsersPaginated(page, size int) ([]models.User, error) {
 	var users []models.User
 	offset := (page - 1) * size
 
-	query := "SELECT id, name, access_levels, created_at, updated_at, token FROM Users LIMIT $1 OFFSET $2"
+	query := `
+	SELECT id, name, access_levels, created_at, updated_at, token 
+	FROM Users 
+	LIMIT $1
+	OFFSET $2`
 	rows, err := db.DB.Query(query, size, offset)
 	if err != nil {
 		log.Printf("Failed to execute query: %v\n", err)

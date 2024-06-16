@@ -1,6 +1,5 @@
 Server:
   port: 8082
-  pageSize: 3
 
 Database:
   driver: "postgres"
@@ -9,3 +8,6 @@ Database:
   user: "olegsemashko"
   password: 1703
   dbname: "avitoDB"
+
+
+PageSize: 3

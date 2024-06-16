@@ -21,6 +21,7 @@ type DatabaseConfig struct {
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
+	PageSize int `yaml:"PageSize"`
 }
 
 func GetConfig() *Config {
