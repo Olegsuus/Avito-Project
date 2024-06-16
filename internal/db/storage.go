@@ -98,8 +98,8 @@ func (db *DataBase) GetUserByID(id int) (*models.User, error) {
 	return &user, nil
 }
 
-// GetBannersByTagID метод для получения списка баннеров по id тега
-func (db *DataBase) GetBannersByTagID(tagID int) ([]models.Banner, error) {
+// GetBannerByTagID метод для получения списка баннеров по id тега
+func (db *DataBase) GetBannerByTagID(tagID int) ([]models.Banner, error) {
 	var banners []models.Banner
 	query := `
 	SELECT b.id, b.title, b.text, b.url, b.created_at, b.updated_at, b.owner_id, b.f_id
@@ -133,10 +133,10 @@ func (db *DataBase) GetBannersByTagID(tagID int) ([]models.Banner, error) {
 	return banners, nil
 }
 
-// GetBannersByFID метод для получение списка баннеров по f_id
-func (db *DataBase) GetBannersByFID(fID int) ([]models.Banner, error) {
+// GetBannerByFID метод для получение списка баннеров по f_id
+func (db *DataBase) GetBannerByFID(fID int) ([]models.Banner, error) {
 	var banners []models.Banner
-	query := "SELECT id, title, text, url, created_at, updated_at,owner_id, f_id FROM Banners WHERE owner_id = 1$"
+	query := "SELECT id, title, text, url, created_at, updated_at, owner_id, f_id FROM Banners WHERE f_id = $1"
 	rows, err := db.DB.Query(query, fID)
 	if err != nil {
 		log.Fatalf("Failed to execute query: %v\n", err)
@@ -149,7 +149,7 @@ func (db *DataBase) GetBannersByFID(fID int) ([]models.Banner, error) {
 		var banner models.Banner
 		err := rows.Scan(&banner.Id, &banner.Title, &banner.Text, &banner.Url, &banner.CreatedAt, &banner.UpdatedAt, &banner.OwnerId, &banner.FId)
 		if err != nil {
-			panic(err)
+			log.Printf("Failed to scan rows")
 		}
 		banners = append(banners, banner)
 	}
@@ -271,6 +271,75 @@ func (db *DataBase) AddAccessLevel(level *models.AccessLevel) error {
 		log.Printf("Failed to add access level: %v", err)
 	}
 	return nil
+}
+
+// GetUsersPaginated метод для получения юзеров через пагинацию
+func (db *DataBase) GetUsersPaginated(page, size int) ([]models.User, error) {
+	var users []models.User
+	offset := (page - 1) * size
+
+	query := `
+	SELECT id, name, access_levels, created_at, updated_at, token 
+	FROM Users 
+	LIMIT $1
+	OFFSET $2`
+	rows, err := db.DB.Query(query, size, offset)
+	if err != nil {
+		log.Printf("Failed to execute query: %v\n", err)
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(&user.Id, &user.Name, &user.AccessLevels, &user.CreatedAt, &user.UpdatedAt, &user.Token)
+		if err != nil {
+			log.Printf("Failed to scan rows: %v\n", err)
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Failed iteration rows: %v\n", err)
+		return nil, err
+	}
+
+	return users, nil
+}
+
+// GetBannersPaginated метод для получения списка через пагинацию
+func (db *DataBase) GetBannersPaginated(page, size int) ([]models.Banner, error) {
+	var banners []models.Banner
+	offset := (page - 1) * size
+
+	query := "SELECT id, title, text, url, created_at, updated_at, owner_id, f_id FROM Banners LIMIT $1 OFFSET $2"
+	rows, err := db.DB.Query(query, size, offset)
+	if err != nil {
+		log.Fatalf("Failed to execute query: %v\n", err)
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var banner models.Banner
+
+		err := rows.Scan(&banner.Id, &banner.Title, &banner.Text, &banner.Url, &banner.CreatedAt, &banner.UpdatedAt, &banner.OwnerId, &banner.FId)
+		if err != nil {
+			log.Fatalf("Failed to rows scan: %v\n", err)
+			return nil, err
+		}
+		banners = append(banners, banner)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Failed to iteration rows: %v\n", err)
+		return nil, err
+	}
+
+	return banners, nil
 }
 
 //todo: добавить пагинацию при получения баннеров

@@ -22,8 +22,8 @@ type Storage interface {
 	GetBanner(int) (*models.Banner, error)
 	GetUser(string) (*models.User, error)
 	GetUserByID(int) (*models.User, error)
-	GetBannersByTagID(int) ([]models.Banner, error)
-	GetBannersByFID(int) ([]models.Banner, error)
+	GetBannerByTagID(int) ([]models.Banner, error)
+	GetBannerByFID(int) ([]models.Banner, error)
 	GetAllUsers() ([]models.User, error)
 	GetAllBanners() ([]models.Banner, error)
 	Stop() error
@@ -32,6 +32,8 @@ type Storage interface {
 	AddBanner(*models.Banner) error
 	DeleteBanner(int) error
 	AddAccessLevel(*models.AccessLevel) error
+	GetUsersPaginated(int, int) ([]models.User, error)
+	GetBannersPaginated(int, int) ([]models.Banner, error)
 }
 
 func (a *App) Start() error {
