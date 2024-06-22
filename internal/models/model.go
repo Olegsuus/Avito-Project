@@ -2,7 +2,6 @@ package models
 
 import "time"
 
-// Структура пользователя
 type User struct {
 	Id           uint      `json:"id"`
 	Name         string    `json:"name"`
@@ -12,7 +11,6 @@ type User struct {
 	Token        string    `json:"token"`
 }
 
-// Структура баннера
 type Banner struct {
 	Id        uint      `json:"id"`
 	Title     string    `json:"title"`
@@ -22,13 +20,13 @@ type Banner struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	OwnerId   uint      `json:"owner_id"`
 	FId       int       `json:"f_id"`
+	Tags      []int     `json:"tags"`
 }
 
-// Структура тегов
 type Tags struct {
-	Id       uint   `json:"id"`
-	Name     string `json:"name"`
-	BannerId uint   `json:"banner_id"`
+	Id       uint `json:"id"`
+	Tag      int  `json:"tag"`
+	BannerId uint `json:"banner_id"`
 }
 
 type AccessLevel struct {

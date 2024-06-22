@@ -9,12 +9,15 @@ type Server struct {
 
 // GetServer метод для запуска роутера и обработчика запросов
 func (s *Server) GetServer(app *App) {
+
+	//admin := app.Echo.Group("auth/")
+	//admin.Use(auth.Basic)
 	app.Echo.GET("/banner", app.HandleGetBanner)
 	app.Echo.GET("/banners/paginated", app.HandleGetBannersPaginated)
 	app.Echo.GET("/bannersByFID", app.HandleGetBannersByFID)
 	app.Echo.GET("/bannersByTagId", app.HandleGetBannersByTagID)
 	app.Echo.GET("/banners", app.HandleGetAllBanners)
-	app.Echo.GET("/user", app.HandleGetUser)
+	app.Echo.GET("/user", app.HandleGetUserByToken)
 	app.Echo.GET("/users/paginated", app.HandleGetUsersPaginated)
 	app.Echo.GET("/userId", app.HandleGetUserById)
 	app.Echo.GET("/users", app.HandleGetAllUsers)

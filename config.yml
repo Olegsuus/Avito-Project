@@ -11,3 +11,7 @@ Database:
 
 
 PageSize: 3
+
+Admin:
+  username: "Oleg"
+  password: 0000
