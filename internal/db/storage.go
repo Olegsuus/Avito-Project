@@ -368,3 +368,40 @@ func (db *DataBase) GetBannersPaginated(page, size int) ([]models.Banner, error)
 
 	return banners, nil
 }
+
+func (db *DataBase) AuthenticateUser(username, password string) (*models.User, error) {
+	var user models.User
+	query := `
+	SELECT id, name, access_levels, created_at, updated_at, token, password 
+	FROM Users
+	WHERE name = $1 
+	AND
+	password = $2`
+
+	err := db.DB.QueryRow(query, username, password).Scan(&user.Id, &user.Name, &user.AccessLevels, &user.CreatedAt, &user.UpdatedAt, &user.Token, &user.Password)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		log.Printf("Failed to authenticate user: %v\n ", err)
+		return nil, err
+	}
+
+	return &user, err
+}
+
+func (db *DataBase) UpdateUser(user *models.User) error {
+	query := `
+	UPDATE Users 
+	SET name=$1, access_levels=$2, updated_at=$3, token=$4, password=$5 
+	WHERE id=$6
+	`
+
+	_, err := db.DB.Exec(query, user.Name, user.AccessLevels, user.CreatedAt, user.UpdatedAt, user.Token, user.Password, user.Id)
+	if err != nil {
+		log.Printf("Failed to update user: %v", err)
+		return err
+	}
+
+	return nil
+}

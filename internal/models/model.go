@@ -9,6 +9,7 @@ type User struct {
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 	Token        string    `json:"token"`
+	Password     string    `json:"password"`
 }
 
 type Banner struct {

@@ -34,6 +34,8 @@ type Storage interface {
 	AddAccessLevel(*models.AccessLevel) error
 	GetUsersPaginated(int, int) ([]models.User, error)
 	GetBannersPaginated(int, int) ([]models.Banner, error)
+	AuthenticateUser(string, string) (*models.User, error)
+	UpdateUser(user *models.User) error
 }
 
 func (a *App) Start() error {
