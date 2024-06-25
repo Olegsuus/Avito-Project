@@ -15,7 +15,7 @@ type DataBase struct {
 }
 
 func (db *DataBase) GetStorage(cfg *config.Config) {
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%d dbname=%s sslmode=disable",
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		cfg.Database.Host, cfg.Database.Port, cfg.Database.User, cfg.Database.Password, cfg.Database.DBName)
 
 	var err error

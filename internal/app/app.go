@@ -18,6 +18,7 @@ type App struct {
 	Echo            *echo.Echo
 }
 
+//go:generate mockery --name=Storage --case=snake --with-expecter
 type Storage interface {
 	GetBanner(int) (*models.Banner, error)
 	GetUserByToken(string) (*models.User, error)
