@@ -6,8 +6,9 @@ import (
 )
 
 type ServerConfig struct {
-	Port     int `yaml:"port"`
-	PageSize int `yaml:"pageSize"`
+	Port      int    `yaml:"port"`
+	PageSize  int    `yaml:"pageSize"`
+	JwtSecret string `yaml:"JwtSecret"`
 }
 
 type DatabaseConfig struct {
@@ -19,9 +20,10 @@ type DatabaseConfig struct {
 }
 
 type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
-	PageSize int `yaml:"PageSize"`
+	Server    ServerConfig
+	Database  DatabaseConfig
+	PageSize  int    `yaml:"PageSize"`
+	JwtSecret string `yaml:"JwtSecret"`
 }
 
 func GetConfig() *Config {

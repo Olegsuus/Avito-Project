@@ -8,8 +8,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var jwtSecret = []byte("MyToken")
-
 func (a *App) HandleLogin(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
@@ -23,12 +21,12 @@ func (a *App) HandleLogin(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid credentials"})
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
 		"name": user.Name,
 		"exp":  time.Now().Add(time.Hour * 72).Unix(),
 	})
 
-	tokenString, err := token.SignedString(jwtSecret)
+	tokenString, err := token.SignedString([]byte(a.Config.JwtSecret))
 	if err != nil {
 		return err
 	}
@@ -48,10 +46,10 @@ func (a *App) JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		tokenString := authHeader[len("Bearer "):]
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 				return nil, echo.ErrUnauthorized
 			}
-			return jwtSecret, nil
+			return a.Config.JwtSecret, nil
 		})
 		if err != nil || !token.Valid {
 			return echo.ErrUnauthorized

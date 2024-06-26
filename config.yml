@@ -1,6 +1,7 @@
 Server:
   port: 8082
 
+
 Database:
   driver: "postgres"
   host: "localhost"
@@ -10,8 +11,5 @@ Database:
   dbname: "avitoDB"
 
 
+JwtSecret: "MyToken"
 PageSize: 3
-
-Admin:
-  username: "Oleg"
-  password: 0000
