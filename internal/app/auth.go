@@ -8,8 +8,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var jwtSecret = []byte("MyToken")
-
 func (a *App) HandleLogin(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
@@ -28,7 +26,7 @@ func (a *App) HandleLogin(c echo.Context) error {
 		"exp":  time.Now().Add(time.Hour * 72).Unix(),
 	})
 
-	tokenString, err := token.SignedString(jwtSecret)
+	tokenString, err := token.SignedString([]byte(a.Config.JWTSecret))
 	if err != nil {
 		return err
 	}
@@ -51,7 +49,7 @@ func (a *App) JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, echo.ErrUnauthorized
 			}
-			return jwtSecret, nil
+			return []byte(a.Config.JWTSecret), nil
 		})
 		if err != nil || !token.Valid {
 			return echo.ErrUnauthorized

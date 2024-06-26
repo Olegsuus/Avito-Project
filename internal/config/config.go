@@ -19,9 +19,10 @@ type DatabaseConfig struct {
 }
 
 type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
-	PageSize int `yaml:"PageSize"`
+	Server    ServerConfig
+	Database  DatabaseConfig
+	PageSize  int    `yaml:"PageSize"`
+	JWTSecret string `yaml:"JWTSecret"`
 }
 
 func GetConfig() *Config {
