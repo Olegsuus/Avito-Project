@@ -34,8 +34,8 @@ CREATE TABLE Tags (
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE IF EXISTS Access_levels;
-DROP TABLE IF EXISTS Users;
-DROP TABLE IF EXISTS Banners;
-DROP TABLE IF EXISTS Tags;
+DROP TABLE Tags;
+DROP TABLE Banners;
+DROP TABLE Users;
+DROP TABLE Access_levels;
 -- +goose StatementEnd

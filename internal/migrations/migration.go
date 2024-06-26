@@ -9,7 +9,7 @@ import (
 	"github.com/pressly/goose/v3"
 )
 
-//go:embed migrations/20240601104358_new_user_table.sql
+//go:embed migrations/*.sql
 var embedMigrations embed.FS
 
 func Migrations(cfg *config.Config, db *sql.DB) {
@@ -23,4 +23,6 @@ func Migrations(cfg *config.Config, db *sql.DB) {
 	if err := goose.Up(db, "migrations"); err != nil {
 		log.Fatalf("Failed to apply migrations: %v", err)
 	}
+
+	log.Println("Success migrations")
 }

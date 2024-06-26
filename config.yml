@@ -8,3 +8,8 @@ Database:
   user: "olegsemashko"
   password: 1703
   dbname: "avitoDB"
+
+
+PageSize: 3
+
+JWTSecret: "MyToken"

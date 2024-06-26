@@ -14,9 +14,8 @@ type DataBase struct {
 	DB *sql.DB
 }
 
-// GetStorage функция для подключения к Базе Данных
 func (db *DataBase) GetStorage(cfg *config.Config) {
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%d dbname=%s sslmode=disable",
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		cfg.Database.Host, cfg.Database.Port, cfg.Database.User, cfg.Database.Password, cfg.Database.DBName)
 
 	var err error
@@ -30,7 +29,6 @@ func (db *DataBase) GetStorage(cfg *config.Config) {
 	}
 }
 
-// Stop метод для закрытие БД
 func (db *DataBase) Stop() error {
 	if db.DB != nil {
 		err := db.DB.Close()
@@ -44,8 +42,7 @@ func (db *DataBase) Stop() error {
 	return nil
 }
 
-// GetUser метод для получения данных юзера по токкену
-func (db *DataBase) GetUser(token string) (*models.User, error) {
+func (db *DataBase) GetUserByToken(token string) (*models.User, error) {
 	var user models.User
 	query := "SELECT id, name, access_levels, created_at, updated_at, token FROM Users WHERE token = $1"
 	row := db.DB.QueryRow(query, token)
@@ -62,7 +59,6 @@ func (db *DataBase) GetUser(token string) (*models.User, error) {
 	return &user, nil
 }
 
-// GetBanner метод для получения данных баннера по id
 func (db *DataBase) GetBanner(id int) (*models.Banner, error) {
 	var banner models.Banner
 	query := "SELECT id, title, text, url, created_at, updated_at, owner_id, f_id FROM Banners WHERE id = $1"
@@ -80,7 +76,6 @@ func (db *DataBase) GetBanner(id int) (*models.Banner, error) {
 	return &banner, nil
 }
 
-// GetUserByID метод для получения юзера по id
 func (db *DataBase) GetUserByID(id int) (*models.User, error) {
 	var user models.User
 	query := "SELECT id, name, access_levels, created_at, updated_at, token FROM Users WHERE id = $1"
@@ -98,45 +93,80 @@ func (db *DataBase) GetUserByID(id int) (*models.User, error) {
 	return &user, nil
 }
 
-// GetBannersByTagID метод для получения списка баннеров по id тега
-func (db *DataBase) GetBannersByTagID(tagID int) ([]models.Banner, error) {
+func (db *DataBase) GetBannerByTagID(tag int) ([]models.Banner, error) {
 	var banners []models.Banner
+
 	query := `
 	SELECT b.id, b.title, b.text, b.url, b.created_at, b.updated_at, b.owner_id, b.f_id
-    FROM banners b
-    JOIN tags t ON b.id = t.banner_id
-    WHERE t.id = $1`
+   FROM banners b
+   JOIN tags t ON b.id = t.banner_id
+   WHERE t.tag = $1`
 
-	rows, err := db.DB.Query(query, tagID)
+	rows, err := db.DB.Query(query, tag)
 	if err != nil {
-		log.Fatalf("Failed to execute query: %v\n", err)
+		log.Printf("Failed to execute query: %v\n", err)
 		return nil, err
 	}
-
 	defer rows.Close()
 
 	for rows.Next() {
 		var banner models.Banner
 		err := rows.Scan(&banner.Id, &banner.Title, &banner.Text, &banner.Url, &banner.CreatedAt, &banner.UpdatedAt, &banner.OwnerId, &banner.FId)
 		if err != nil {
-			log.Fatalf("Failed to scan rows: %v\n", err)
+			log.Printf("Failed to scan rows: %v\n", err)
 			return nil, err
 		}
 
+		tags, err := db.GetTagByBanner(banner.Id)
+		if err != nil {
+			log.Printf("Failed to get tags: %v", err)
+		}
+
+		banner.Tags = tags
 		banners = append(banners, banner)
 	}
+
 	if err := rows.Err(); err != nil {
-		log.Fatalf("Row iteration error: %v\n", err)
+		log.Printf("Row iteration error: %v\n", err)
 		return nil, err
 	}
 
 	return banners, nil
 }
 
-// GetBannersByFID метод для получение списка баннеров по f_id
-func (db *DataBase) GetBannersByFID(fID int) ([]models.Banner, error) {
+func (db *DataBase) GetTagByBanner(bannerId uint) ([]int, error) {
+	tags := make([]int, 0)
+
+	tagsQuery := "SELECT tag FROM Tags WHERE banner_id = $1"
+	tagsRows, err := db.DB.Query(tagsQuery, bannerId)
+	if err != nil {
+		log.Printf("Failed to execute tags query: %v\n", err)
+		return nil, err
+	}
+	defer tagsRows.Close()
+
+	for tagsRows.Next() {
+		var tag int
+		err := tagsRows.Scan(&tag)
+		if err != nil {
+			log.Printf("Failed to scan tag row: %v\n", err)
+			return nil, err
+		}
+
+		tags = append(tags, tag)
+
+	}
+	if err := tagsRows.Err(); err != nil {
+		log.Printf("Tag row iteration error: %v\n", err)
+		return nil, err
+	}
+
+	return tags, nil
+}
+
+func (db *DataBase) GetBannerByFID(fID int) ([]models.Banner, error) {
 	var banners []models.Banner
-	query := "SELECT id, title, text, url, created_at, updated_at,owner_id, f_id FROM Banners WHERE owner_id = 1$"
+	query := "SELECT id, title, text, url, created_at, updated_at, owner_id, f_id FROM Banners WHERE f_id = $1"
 	rows, err := db.DB.Query(query, fID)
 	if err != nil {
 		log.Fatalf("Failed to execute query: %v\n", err)
@@ -149,7 +179,7 @@ func (db *DataBase) GetBannersByFID(fID int) ([]models.Banner, error) {
 		var banner models.Banner
 		err := rows.Scan(&banner.Id, &banner.Title, &banner.Text, &banner.Url, &banner.CreatedAt, &banner.UpdatedAt, &banner.OwnerId, &banner.FId)
 		if err != nil {
-			panic(err)
+			log.Printf("Failed to scan rows")
 		}
 		banners = append(banners, banner)
 	}
@@ -162,7 +192,6 @@ func (db *DataBase) GetBannersByFID(fID int) ([]models.Banner, error) {
 	return banners, nil
 }
 
-// GetAllBanners метод для получения всего списка баннеров
 func (db *DataBase) GetAllBanners() ([]models.Banner, error) {
 	var banners []models.Banner
 
@@ -191,7 +220,6 @@ func (db *DataBase) GetAllBanners() ([]models.Banner, error) {
 	return banners, nil
 }
 
-// GetAllUsers метод для получения всего списка юзеров
 func (db *DataBase) GetAllUsers() ([]models.User, error) {
 	var users []models.User
 
@@ -219,7 +247,6 @@ func (db *DataBase) GetAllUsers() ([]models.User, error) {
 	return users, nil
 }
 
-// AddUser метод для добавления юзера
 func (db *DataBase) AddUser(user *models.User) error {
 	query := "INSERT INTO Users (name, access_levels,token) VALUES ($1, $2, $3) RETURNING id"
 	err := db.DB.QueryRow(query, user.Name, user.AccessLevels, user.Token).Scan(&user.Id)
@@ -230,7 +257,6 @@ func (db *DataBase) AddUser(user *models.User) error {
 	return nil
 }
 
-// DeleteUser метод для удаления юзера
 func (db *DataBase) DeleteUser(userId int) error {
 	query := "DELETE FROM Users WHERE id = $1"
 	_, err := db.DB.Exec(query, userId)
@@ -241,7 +267,6 @@ func (db *DataBase) DeleteUser(userId int) error {
 	return nil
 }
 
-// AddBanner метод для добавления баннера
 func (db *DataBase) AddBanner(banner *models.Banner) error {
 	query := "INSERT INTO Banners (title, text, url, owner_id, f_id) VALUES ($1, $2,$3, $4, $5) RETURNING id"
 	err := db.DB.QueryRow(query, banner.Title, banner.Text, banner.Url, banner.OwnerId, banner.FId).Scan(&banner.Id)
@@ -252,7 +277,6 @@ func (db *DataBase) AddBanner(banner *models.Banner) error {
 	return nil
 }
 
-// DeleteBanner метод для удаления баннера
 func (db *DataBase) DeleteBanner(bannerId int) error {
 	query := "DELETE FROM Banners WHERE id = $1"
 	_, err := db.DB.Exec(query, bannerId)
@@ -263,7 +287,6 @@ func (db *DataBase) DeleteBanner(bannerId int) error {
 	return nil
 }
 
-// AddAccessLevel метод для добавления уровня доступа
 func (db *DataBase) AddAccessLevel(level *models.AccessLevel) error {
 	query := "INSERT INTO Access_levels (level, job_title) VALUES ($1, $2)"
 	err := db.DB.QueryRow(query, level.Level, level.JobTitle)
@@ -273,7 +296,112 @@ func (db *DataBase) AddAccessLevel(level *models.AccessLevel) error {
 	return nil
 }
 
-//todo: добавить пагинацию при получения баннеров
-//(необходимо ввести стандартный размер страницы. Можно в конфиг)
+func (db *DataBase) GetUsersPaginated(page, size int) ([]models.User, error) {
+	var users []models.User
+	offset := (page - 1) * size
 
-//todo: организовать поиск по тегу и фичи
+	query := `
+	SELECT id, name, access_levels, created_at, updated_at, token 
+	FROM Users 
+	LIMIT $1
+	OFFSET $2`
+
+	rows, err := db.DB.Query(query, size, offset)
+	if err != nil {
+		log.Printf("Failed to execute query: %v\n", err)
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(&user.Id, &user.Name, &user.AccessLevels, &user.CreatedAt, &user.UpdatedAt, &user.Token)
+		if err != nil {
+			log.Printf("Failed to scan rows: %v\n", err)
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Failed iteration rows: %v\n", err)
+		return nil, err
+	}
+
+	return users, nil
+}
+
+func (db *DataBase) GetBannersPaginated(page, size int) ([]models.Banner, error) {
+	var banners []models.Banner
+	offset := (page - 1) * size
+
+	query := `
+	SELECT id, title, text, url, created_at, updated_at, owner_id, f_id 
+	FROM Banners 
+	LIMIT $1 
+	OFFSET $2`
+
+	rows, err := db.DB.Query(query, size, offset)
+	if err != nil {
+		log.Fatalf("Failed to execute query: %v\n", err)
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var banner models.Banner
+
+		err := rows.Scan(&banner.Id, &banner.Title, &banner.Text, &banner.Url, &banner.CreatedAt, &banner.UpdatedAt, &banner.OwnerId, &banner.FId)
+		if err != nil {
+			log.Fatalf("Failed to rows scan: %v\n", err)
+			return nil, err
+		}
+		banners = append(banners, banner)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Failed to iteration rows: %v\n", err)
+		return nil, err
+	}
+
+	return banners, nil
+}
+
+func (db *DataBase) AuthenticateUser(username, password string) (*models.User, error) {
+	var user models.User
+	query := `
+	SELECT id, name, access_levels, created_at, updated_at, token, password 
+	FROM Users
+	WHERE name = $1 
+	AND
+	password = $2`
+
+	err := db.DB.QueryRow(query, username, password).Scan(&user.Id, &user.Name, &user.AccessLevels, &user.CreatedAt, &user.UpdatedAt, &user.Token, &user.Password)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		log.Printf("Failed to authenticate user: %v\n ", err)
+		return nil, err
+	}
+
+	return &user, err
+}
+
+func (db *DataBase) UpdateUser(user *models.User) error {
+	query := `
+	UPDATE Users 
+	SET name=$1, access_levels=$2, updated_at=$3, token=$4, password=$5 
+	WHERE id=$6
+	`
+
+	_, err := db.DB.Exec(query, user.Name, user.AccessLevels, user.CreatedAt, user.UpdatedAt, user.Token, user.Password, user.Id)
+	if err != nil {
+		log.Printf("Failed to update user: %v", err)
+		return err
+	}
+
+	return nil
+}

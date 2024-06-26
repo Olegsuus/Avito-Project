@@ -18,12 +18,13 @@ type App struct {
 	Echo            *echo.Echo
 }
 
+//go:generate mockery --name=Storage --case=snake --with-expecter
 type Storage interface {
 	GetBanner(int) (*models.Banner, error)
-	GetUser(string) (*models.User, error)
+	GetUserByToken(string) (*models.User, error)
 	GetUserByID(int) (*models.User, error)
-	GetBannersByTagID(int) ([]models.Banner, error)
-	GetBannersByFID(int) ([]models.Banner, error)
+	GetBannerByTagID(int) ([]models.Banner, error)
+	GetBannerByFID(int) ([]models.Banner, error)
 	GetAllUsers() ([]models.User, error)
 	GetAllBanners() ([]models.Banner, error)
 	Stop() error
@@ -32,6 +33,10 @@ type Storage interface {
 	AddBanner(*models.Banner) error
 	DeleteBanner(int) error
 	AddAccessLevel(*models.AccessLevel) error
+	GetUsersPaginated(int, int) ([]models.User, error)
+	GetBannersPaginated(int, int) ([]models.Banner, error)
+	AuthenticateUser(string, string) (*models.User, error)
+	UpdateUser(user *models.User) error
 }
 
 func (a *App) Start() error {
@@ -45,7 +50,6 @@ func (a *App) Start() error {
 	return a.Echo.Start(addr)
 }
 
-// Stop закрывает если есть ошибки
 func (a *App) Stop() {
 	if err := a.DB.Stop(); err != nil {
 		log.Fatalf("Failed to close database: %v", err)
